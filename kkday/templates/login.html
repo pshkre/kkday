@@ -1,0 +1,47 @@
+<html>
+<head>
+	<title>登入</title>
+</head>
+<body>
+	<dd><font size="5" face="微軟正黑體">Login</font></dd>
+<hr/>
+	<input type="text" class="login-username" id="useraccount" autofocus="true" required="true" placeholder="Username" />
+	<br><br>
+	<input type="password" class="login-password" id="userpassword" required="true" placeholder="Password" />
+	<br><br>
+	<button type="button" name="Login" value="Login" class="login-submit" onClick="LoginBt();"	 >Login</a></button>
+</body>
+<script type="text/javascript">
+	var http_provider = 'http://140.113.72.23:8545';
+    
+
+    var Web3 = require('web3');
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://140.113.72.23:8545'));
+
+	//缺solidity的ABI
+
+    function LoginBt() {
+		var useraccount = document.getElementById('useraccount').value; //讀取使用者的account
+		var userpassword = document.getElementById('userpassword').value;//讀取使用者的password
+		var user_yn = market.checkuser.call(useraccount);	
+		if(user_yn==true){	
+		    //帳號存在密碼輸錯
+		    if(market.login.call(useraccount, userpassword)== 0x0){
+			    alert("密碼錯誤，請再輸入一遍");
+			}
+			//成功登入
+			else{//將變數存入暫存記憶體中
+				localStorage.setItem('address', market.login.call(useraccount, userpassword));
+				localStorage.setItem('username', useraccount);
+				localStorage.setItem('userpassword', userpassword);
+			    location.href = "./index.html";//成功登入，跳轉到首頁(暫時用本地端的index.html)
+				
+			}
+		}
+		else if(user_yn==false){
+		    //帳號不存在
+			alert("帳號不存在或是輸入錯誤，請再輸入一遍或選擇註冊");					
+		}
+    }
+</script>
+</html>
