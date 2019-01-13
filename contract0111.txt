@@ -1,0 +1,315 @@
+pragma solidity ^0.4.19;
+
+
+contract Token{
+	// Public variables of the token
+    
+	string public name;
+    
+	uint256 public totalSupply;
+    
+	uint256 public buyprice;
+    
+	address public owner;
+    
+	uint256 public issue_time;
+    
+    
+	uint256 public lastprice;
+    
+	uint256 public lasttime;
+	
+	//for order掛單用
+    struct Order {
+        uint256 orderno;
+        uint256 time;
+        address from;
+        uint256 price;
+        uint256 amount; 
+    }
+
+    uint256 orderno;
+    Order[] public b;
+    Order[] public s;
+    
+     modifier onlyOwner{
+        require(msg.sender == owner);
+        //if the condition in the require is true, execute the function
+        _;
+    }
+	// This creates an array with all balances
+    
+	mapping (address => uint256) public balanceOf;
+    
+    event deal(address indexed tokenaddress,address indexed from,address indexed to,uint256 timestamp,uint256 amount,uint256 price);
+    
+    
+	//constructor()
+    
+	function Token (string tokenname,uint256 supplyamount,uint256 buyP) public {
+		name = tokenname;
+        
+		totalSupply = supplyamount;
+        
+		balanceOf[msg.sender]=totalSupply;
+        
+		buyprice = buyP;
+        
+		owner=msg.sender;
+        
+		lasttime=now;
+        
+		lastprice=0;
+    
+	}
+    
+    
+	
+	//buy and sell
+    
+	function transfer(address _from,address _to, uint256 _value) internal returns (bool success) {
+        
+		require(balanceOf[_from] >= _value);           
+        
+		require(balanceOf[_to] + _value >= balanceOf[_to]); 
+        
+		balanceOf[_from] -= _value;                    
+        
+		balanceOf[_to] += _value;  
+        
+		return true;
+    
+	}
+    
+	//發行token>>設定匯率與發行量
+	
+	
+	
+	//--------------------------買賣掛單-------------------------------------------------
+    //when sell token , put token temporary in contract. 
+    function temptransfer(address _from, address _to, uint256 _amount) onlyOwner public{
+
+    //if(msg.sender != owner) return;
+        if(balanceOf[_from] < _amount) return;
+        transfer(_from, _to, _amount);
+    }
+
+    //buy Order
+    function buy(address _from,uint256 _price,uint256 _amount)public {
+        if(balanceOf[_from] >= _amount)
+        {
+            b.push(Order(orderno,now,_from,_price,_amount));
+            orderno++;
+        }
+    }  
+	
+	//sell Order
+	function sell(address _from,uint256 _price,uint256 _amount)public {
+        if(balanceOf[msg.sender] >= _amount)
+        {
+            s.push(Order(orderno,now,_from,_price,_amount));
+            orderno++;
+        }
+    }
+    
+    //搓合買
+    function buyROD(address _from,uint256 _price, uint256 _amount) onlyOwner public {
+
+        //if(msg.sender != owner) return;
+
+        uint256 dealamount;
+        uint256 dealprice;
+        
+        for(uint256 count = 0;count <s.length;count++)
+        {
+            if(_amount==0) {
+                break;
+            }
+            if(_price>=s[count].price)
+            {
+                dealprice = s[count].price;
+                if(_amount >= s[count].amount){
+                    dealamount = s[count].amount;
+                }
+                else {
+                    dealamount = _amount;
+                }
+                s[count].amount-= dealamount;
+                _amount-=dealamount;
+                transfer(_from,s[count].from,dealamount);
+                deal(this,s[count].from,_from,now,dealamount,dealprice);//event
+            }
+        }
+        //removezerosell();
+        //no deal, push into buy struct
+        if (_amount > 0)
+        {
+            b.push(Order(orderno,now, _from, _price, _amount));
+            orderno++;
+        }
+    }
+    
+    //搓合賣
+    function sellROD(address _from,uint256 _price, uint256 _amount) onlyOwner  public{
+
+        //if(msg.sender != owner) return;
+        //check user have enough token
+        if(balanceOf[_from] < _amount ) return;
+        temptransfer(_from,this,_amount);
+
+        uint256 dealamount;
+        uint256 dealprice;
+        
+        for(uint256 count=0;count<b.length;count++)
+        {
+            if(_amount==0){
+                break;
+            }
+            if(_price <= b[count].price){
+                dealprice = _price;
+                if(_amount >= b[count].amount){
+                    dealamount = b[count].amount;
+                }
+                else {
+                    dealamount = _amount;
+                }
+                b[count].amount -= dealamount;
+                _amount -= dealamount;
+                transfer(b[count].from,this,dealamount);
+                deal(this,_from,b[count].from,now,dealamount,dealprice);
+
+            }
+        }
+        //removezerobuy();
+        if (_amount > 0)
+        {
+            s.push(Order(orderno,now, _from, _price, _amount));
+            orderno++;
+        }
+    }
+    
+    
+
+}
+
+
+
+contract market{
+    
+    
+	//variables of market
+    
+	struct user{
+        
+		string account;
+        
+		string password;
+        
+		address useraddress;
+    
+	}
+
+    
+	struct token{
+        
+		string tokenname;
+        
+		uint256 totalsupply;
+        
+		uint256 buyprice;
+        
+		address tokenaddress;
+    
+	}
+
+    
+	user[] public userlist;
+    
+	token[] public tokenlist;
+    
+	uint256 public userno;
+    
+	uint256 public tokenno;
+    
+	address owner;
+    
+    
+	function market()public{
+        
+		userno=0;
+        
+		tokenno=0;
+        
+		owner=msg.sender;
+    
+	}
+    
+    
+	//check user
+    
+	function checkUser(string account)public view returns(bool fine){
+        
+		for(uint i=0;i<userlist.length;i++)
+            
+			if(keccak256(account) == keccak256(userlist[i].account))
+                
+				return true;
+        
+		return false;
+    
+	}
+    
+    
+	//login
+    
+	function login(string account,string password)public view returns(bool success){
+        
+		for(uint i=0;i<userlist.length;i++){
+            
+			if(keccak256(account) == keccak256(userlist[i].account)){
+                
+				if(keccak256(password) == keccak256(userlist[i].password))
+                    
+					return true;
+                
+				else
+                    
+					return false;
+            
+			}
+                
+        
+		}
+        
+		return false;
+    
+	}
+    
+    
+	//register
+    
+	function register(string account, string password)public returns(bool success){
+        
+		for(uint i=0;i<userlist.length;i++){
+            
+			if(keccak256(account) == keccak256(userlist[i].account))
+                
+				return false;
+        
+		}
+        
+		//沒有重複
+        
+		userlist.push(user(account,password,msg.sender));
+        
+		userno++;
+    
+	}
+    
+    
+	//新增貨幣
+    
+    
+	//移除貨幣
+
+}
