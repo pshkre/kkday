@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <head>
 	<title>註冊</title>
@@ -12,167 +11,32 @@
 	<br><br>
 	<button type="button" name="Register" value="Register" onClick="RegisterBt();"	 >Register</button>
 </body>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
 <script type="text/javascript">
+	//Require library
 	var Web3 = require('web3');
     var web3 = new Web3(new Web3.providers.HttpProvider('http://140.113.72.23:8545'));
+	
+	//Set default account
+	web3.eth.defaultAccount = web3.eth.accounts[0];
+	//web3.eth.defaultAccount = '0xdcdb2b60661679fec219558b95880b9b2dc86c05';
+	//web3.personal.unlockAccount(web3.eth.defaultAccount, '123', 300);
 
-	function RegisterBt(){
-		
-		alert("before contract");
-		var market = web3.eth.contract([
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "account",
-				"type": "string"
-			}
-		],
-		"name": "checkUser",
-		"outputs": [
-			{
-				"name": "fine",
-				"type": "bool"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "userno",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "tokenlist",
-		"outputs": [
-			{
-				"name": "tokenname",
-				"type": "string"
-			},
-			{
-				"name": "totalsupply",
-				"type": "uint256"
-			},
-			{
-				"name": "buyprice",
-				"type": "uint256"
-			},
-			{
-				"name": "tokenaddress",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
+	//ABI & address developed in remix
+	var ABI = [
 	{
 		"constant": false,
 		"inputs": [
 			{
-				"name": "account",
-				"type": "string"
-			},
-			{
-				"name": "password",
-				"type": "string"
-			},
-			{
-				"name": "_address",
-				"type": "address"
+				"name": "val",
+				"type": "uint256"
 			}
 		],
-		"name": "register",
-		"outputs": [
-			{
-				"name": "success",
-				"type": "bool"
-			}
-		],
+		"name": "setValue",
+		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "account",
-				"type": "string"
-			},
-			{
-				"name": "password",
-				"type": "string"
-			}
-		],
-		"name": "login",
-		"outputs": [
-			{
-				"name": "",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [],
-		"name": "tokenno",
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"constant": true,
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"name": "userlist",
-		"outputs": [
-			{
-				"name": "account",
-				"type": "string"
-			},
-			{
-				"name": "password",
-				"type": "string"
-			},
-			{
-				"name": "useraddress",
-				"type": "address"
-			}
-		],
-		"payable": false,
-		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -180,21 +44,61 @@
 		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "constructor"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getValue",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "value",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
 	}
-],'0xf216eedea2648594b6771ca3dbd95498721d741e');
+];
+	var address = "0x9876e235a87f520c827317a8987c9e1fde804485";
+	
+	function RegisterBt(){
+		var market = web3.eth.contract(ABI).at(address);
+	
+		var account = document.getElementById('useraccount').value;
+		var password = document.getElementById('userpassword').value;
+		var password2 = document.getElementById('userpassword2').value;
 		
-		alert("after contract");
-		var account = document.getElementById('useraccount').value; //read account
-		var password = document.getElementById('userpassword').value;//read password
-		var password2 = document.getElementById('userpassword2').value;//read password again
 		if(password!=password2)
 			alert("兩次密碼輸入不同");
 		else{
-			if(market.register.call(account,password)==true){
+			//var reg = market.ownerregister.call(account,password,"test",100,10,12,"0x0",100);
+			document.getElementById('useraccount').value = reg;
+			console.log("value="+reg);
+			if(reg==true){
 				alert("註冊完成!");
-				location.href = "./login.html";
+				location.href = "/login";
+			}
+			else{
+				alert("註冊失敗");
+				window.location.reload();
 			}
 		}
+
 	}
 </script>
 </html>
