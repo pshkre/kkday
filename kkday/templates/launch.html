@@ -857,7 +857,7 @@
 		"type": "function"
 	}
 ];
-	var address = "0x9a6c45b2b696d017677c8b91e011d11ca35661b0";
+	var address = "0xa127578ef1be91d9a9a8871fea892b3a9ee701c5";
 	
 	var market = web3.eth.contract(ABI).at(address);
 	
@@ -943,38 +943,11 @@
 				break;
 			}
 		}
-		if(flag){
+		//if(flag){
 			alert("成功撮合！");
 			location.href = "/";
-		}
-		/*
-		var BuyOrderL = market.getBuyCount.call();
-		console.log("BuyOrderL"+BuyOrderL);
-		var i=0;
-		for(i=0;i<BuyOrderL;i++){
-			var suc = market.buyROD.call(i);
-			if(suc==true){
-				market.buyROD.sendTransaction(i,
-					{from:'0xdcdb2b60661679fec219558b95880b9b2dc86c05', gas:4000000}, 
-					function(error, result){
-					if(!error){
-						console.log('result:'+result);
-					}
-					else{
-						console.log('error:'+error);
-					}
-				});
-			}
-			else{
-				alert("撮合失敗");
-				break;
-			}
-		}
-		if(i>=BuyOrderL && i!=0){
-			alert("撮合成功");
-			window.location.reload();
-		}
-		*/
+		//}
+		
 	}
 	
 	function Logout(){
