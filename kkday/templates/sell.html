@@ -1,0 +1,927 @@
+<html>
+<head>
+	<title>首頁</title>
+</head>
+<style>
+	#banner{
+		background-color:#FFFFFF;
+		color:#26BEC9;
+		border:100%;
+		font-family:微軟正黑體;
+		font-size:64px;
+		text-align:center;
+		vertical-align:center;
+		height:100px;
+	}
+	#menu{
+		background-color:#1F9BA5;
+		color:#FFFFFF;
+		border:100%;
+		font-family:微軟正黑體;
+		font-size:26px;
+		vertical-align:center;
+		height:50px;
+	}
+	.menustyle{
+		text-decoration:none;
+		color:#FFFFFF;
+		height:50px;
+		line-height:50px;
+	}
+	.sele{
+		width:180px;
+		height:30px;
+		font-size:18px;
+		font-family:微軟正黑體;
+		float:left;
+	}
+</style>
+<body onload="checkUser();">
+	<div id="banner">
+		首頁
+	</div>
+	<div id="menu">
+		<div id="login" style="float:left;">
+			<a href="./index.html" id="mainpage" class="menustyle">&nbsp;首頁</a>
+			<a href="./buy.html" id="buytoken" class="menustyle">購買點數</a>
+			<a href="./sell.html" id="selltoken" class="menustyle">販售點數</a>
+		</div>
+		<div id="superuser" style="float:left;">
+			<a href="./launch.html" id="launchtoken" class="menustyle">&nbsp;Admin</a>
+		</div>
+		<div id="login2" style="float:right;">
+			<a href="./a.html" id="name" class="menustyle"></a>
+			<a href="###" id="logoutt" class="menustyle" onclick="Logout();">登出</a>
+		</div>
+		<div id="logout" style="float:right;">
+			<a href="./login.html" id="loginn" class="menustyle">登入</a>
+		</div>
+	</div>
+	<div class="common">
+		<dd><font size="10" face="微軟正黑體">Sell</font></dd>
+		<hr/><br/>
+		<form name="CompanyForm">
+			<select name="SellCompany" id="SellCompany" class="sele" onchange="Select();">
+				<option value="-1">Choose Company</option>
+			</select>
+		</form>
+		<br>
+		<font id="currentPrice" size="5" face="微軟正黑體" style="vertical-align:center;">當前價格 :</font>
+		<font id="currentHas" size="5" face="微軟正黑體" style="vertical-align:center;">&nbsp;&nbsp;&nbsp;&nbsp;目前擁有 :</font><br><br>
+		
+		<font face="微軟正黑體">欲售價格 : </font>
+		<input type="text" class="sell_price" id="sell_price" autofocus="true" required="true" /><br><br>
+		<font face="微軟正黑體">數量 : </font>
+		<input type="text" class="sell_amount" id="sell_amount" autofocus="true" required="true" /><br><br>
+		<button type="button" name="sell_confirm" onClick="Sell_comfirmBt();" style="width:100px;height:35px;font-size:16px;">Confirm</button>
+	<br/><br/>
+	</div>
+
+</body>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+<script language="javascript" >
+	var username = localStorage.getItem('username');
+	
+	//Require library
+	var Web3 = require('web3');
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://140.113.72.23:8545'));
+	//Set default account
+	//web3.eth.defaultAccount = web3.eth.accounts[0];
+	web3.eth.defaultAccount = '0xdcdb2b60661679fec219558b95880b9b2dc86c05';
+    var account_passphrase = '123';
+	web3.personal.unlockAccount(web3.eth.defaultAccount, account_passphrase, 300);
+	//ABI & address developed in remix
+	var ABI = [
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "account",
+				"type": "string"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addBuy",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "mytokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addMytoken",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "mytokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addMytokenAmount",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addNCTU",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "account",
+				"type": "string"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addSell",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "index",
+				"type": "bytes32"
+			}
+		],
+		"name": "buyROD",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "high",
+				"type": "uint256"
+			},
+			{
+				"name": "low",
+				"type": "uint256"
+			}
+		],
+		"name": "checkratio",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "bs",
+				"type": "uint256"
+			},
+			{
+				"name": "key",
+				"type": "bytes32"
+			},
+			{
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "deleteBS",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "mytokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "lessMytokenAmount",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "lessNCTU",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "totalsupply",
+				"type": "uint256"
+			},
+			{
+				"name": "Lbuyprice",
+				"type": "uint256"
+			},
+			{
+				"name": "Hsellprice",
+				"type": "uint256"
+			},
+			{
+				"name": "NCTUtoken",
+				"type": "uint256"
+			}
+		],
+		"name": "newToken",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_account",
+				"type": "string"
+			},
+			{
+				"name": "_password",
+				"type": "string"
+			},
+			{
+				"name": "_tokenname",
+				"type": "bytes32"
+			},
+			{
+				"name": "_totalsupply",
+				"type": "uint256"
+			},
+			{
+				"name": "_Lbuyprice",
+				"type": "uint256"
+			},
+			{
+				"name": "_Hsellbuyprice",
+				"type": "uint256"
+			},
+			{
+				"name": "_NCTUtoken",
+				"type": "uint256"
+			}
+		],
+		"name": "ownerregister",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "index",
+				"type": "bytes32"
+			}
+		],
+		"name": "sortbuy",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "index",
+				"type": "bytes32"
+			}
+		],
+		"name": "sortsell",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_buy",
+				"type": "string"
+			},
+			{
+				"name": "_sell",
+				"type": "string"
+			},
+			{
+				"name": "index",
+				"type": "bytes32"
+			},
+			{
+				"name": "dealamount",
+				"type": "uint256"
+			},
+			{
+				"name": "dealprice",
+				"type": "uint256"
+			}
+		],
+		"name": "transfer",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"name": "_account",
+				"type": "string"
+			},
+			{
+				"name": "_password",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "x",
+				"type": "bytes32"
+			}
+		],
+		"name": "bytes32ToString",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "account",
+				"type": "string"
+			}
+		],
+		"name": "checkOwner",
+		"outputs": [
+			{
+				"name": "fine",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getBuyCount",
+		"outputs": [
+			{
+				"name": "buyCount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_account",
+				"type": "string"
+			},
+			{
+				"name": "mytokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getMytokenAmount",
+		"outputs": [
+			{
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "MytokenRow",
+				"type": "uint256"
+			}
+		],
+		"name": "getMytokenAtIndex",
+		"outputs": [
+			{
+				"name": "mytokenname",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getMytokenCount",
+		"outputs": [
+			{
+				"name": "mytokenCount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getSellCount",
+		"outputs": [
+			{
+				"name": "sellCount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "row",
+				"type": "uint256"
+			}
+		],
+		"name": "getTokenAtIndex",
+		"outputs": [
+			{
+				"name": "tokenname",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getTokenCount",
+		"outputs": [
+			{
+				"name": "tokenCount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getTokenHsp",
+		"outputs": [
+			{
+				"name": "Hsellprice",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getTokenLbp",
+		"outputs": [
+			{
+				"name": "Lbuyprice",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "ownerlist",
+		"outputs": [
+			{
+				"name": "account",
+				"type": "string"
+			},
+			{
+				"name": "password",
+				"type": "string"
+			},
+			{
+				"name": "owneraddress",
+				"type": "address"
+			},
+			{
+				"name": "tokenkey",
+				"type": "bytes32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "account",
+				"type": "string"
+			},
+			{
+				"name": "password",
+				"type": "string"
+			}
+		],
+		"name": "ownerlogin",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "ratelist",
+		"outputs": [
+			{
+				"name": "tokenNoAA",
+				"type": "uint256"
+			},
+			{
+				"name": "tokenNoBB",
+				"type": "uint256"
+			},
+			{
+				"name": "Rate",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "TokenStructs",
+		"outputs": [
+			{
+				"name": "totalsupply",
+				"type": "uint256"
+			},
+			{
+				"name": "issue_time",
+				"type": "uint256"
+			},
+			{
+				"name": "Lbuyprice",
+				"type": "uint256"
+			},
+			{
+				"name": "Hsellprice",
+				"type": "uint256"
+			},
+			{
+				"name": "tokenaddress",
+				"type": "address"
+			},
+			{
+				"name": "NCTUtoken",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+	var address = "0xa127578ef1be91d9a9a8871fea892b3a9ee701c5";
+	
+	var market = web3.eth.contract(ABI).at(address);
+	
+	function checkUser(){
+		document.getElementById('name').innerHTML=username+" , 您好 !  ";
+		if(username!=null){//login
+			document.getElementById('login').style.display='';
+			document.getElementById('login2').style.display='';
+			document.getElementById('superuser').style.display='none';
+			document.getElementById('logout').style.display='none';
+			
+			//superuser
+			if(username=='nctu'){
+				document.getElementById('superuser').style.display='';
+			}
+			else{
+				document.getElementById('superuser').style.display='none';
+			}
+		}
+		else{//not yet login
+			document.getElementById('login').style.display='none';
+			document.getElementById('login2').style.display='none';
+			document.getElementById('superuser').style.display='none';
+			document.getElementById('logout').style.display='';
+		}
+		
+		//List all tokens
+		var objSelect = document.getElementById('SellCompany');
+		// Add object 
+		var tokenLength = market.getTokenCount.call();
+		for(i=0;i<tokenLength;i++){
+			var strName = market.getTokenAtIndex(i);
+			var objOption = new Option(strName,strName);
+			objSelect.options[objSelect.options.length] = objOption;
+		}
+	}
+
+	function Select(){
+		var token = document.getElementById('SellCompany').value;
+		var cp = market.getTokenHsp.call(web3.fromAscii(token));
+		var own = market.getMytokenAmount.call(username,web3.fromAscii(token));//how many you own
+		console.log('Token:'+token);
+		console.log('Current price:'+cp);
+		console.log('Own:'+own);
+		document.getElementById('currentPrice').innerHTML = '當前價格 : '+cp;
+		document.getElementById('currentHas').innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;目前擁有 : '+own;
+	}
+
+	function Sell_comfirmBt(){
+		var token = document.getElementById('SellCompany').value;
+		console.log("Token: "+token);
+		var price = document.getElementById('sell_price').value;
+		var amount = document.getElementById('sell_amount').value;
+		
+		var suc = market.addSell.call(web3.fromAscii(token),username,amount,price);
+		if(suc==true){
+			market.addSell.sendTransaction(web3.fromAscii(token),username,amount,price,
+				{from:'0xdcdb2b60661679fec219558b95880b9b2dc86c05', gas:4000000}, 
+				function(error, result){
+				if(!error){
+					console.log('result:'+result);
+				}
+				else{
+					console.log('error:'+error);
+				}
+			});
+			alert("掛單中，請等候撮合");
+			window.location.reload();
+		}
+		else{
+			alert("販售失敗");
+			window.location.reload();
+		}
+	}
+	
+	function Logout(){
+	
+		localStorage.clear();
+		location.href = "/";
+	}
+	
+</script>
+</html>

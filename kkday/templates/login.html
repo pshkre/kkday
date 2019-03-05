@@ -1,0 +1,799 @@
+<html>
+<head>
+	<title>登入</title>
+</head>
+<body>
+	<dd><font size="5" face="微軟正黑體">Login</font></dd>
+<hr/>
+	<input type="text" class="login-username" id="useraccount" autofocus="true" required="true" placeholder="Username" />
+	<br><br>
+	<input type="password" class="login-password" id="userpassword" required="true" placeholder="Password" />
+	<br><br>
+	<button type="button" name="Login" value="Login" class="login-submit" onClick="LoginBt();">Login</button>
+</body>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+<script type="text/javascript">
+    //Require library
+	var Web3 = require('web3');
+    var web3 = new Web3(new Web3.providers.HttpProvider('http://140.113.72.23:8545'));
+	
+	//Set default account
+	web3.eth.defaultAccount = web3.eth.accounts[0];
+
+	//ABI & address developed in remix
+	var ABI = [
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "account",
+				"type": "string"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addBuy",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "mytokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addMytoken",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "mytokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addMytokenAmount",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addNCTU",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "account",
+				"type": "string"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "addSell",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "index",
+				"type": "bytes32"
+			}
+		],
+		"name": "buyROD",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "high",
+				"type": "uint256"
+			},
+			{
+				"name": "low",
+				"type": "uint256"
+			}
+		],
+		"name": "checkratio",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "bs",
+				"type": "uint256"
+			},
+			{
+				"name": "key",
+				"type": "bytes32"
+			},
+			{
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "deleteBS",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "mytokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "lessMytokenAmount",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "price",
+				"type": "uint256"
+			}
+		],
+		"name": "lessNCTU",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "totalsupply",
+				"type": "uint256"
+			},
+			{
+				"name": "Lbuyprice",
+				"type": "uint256"
+			},
+			{
+				"name": "Hsellprice",
+				"type": "uint256"
+			},
+			{
+				"name": "NCTUtoken",
+				"type": "uint256"
+			}
+		],
+		"name": "newToken",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_account",
+				"type": "string"
+			},
+			{
+				"name": "_password",
+				"type": "string"
+			},
+			{
+				"name": "_tokenname",
+				"type": "bytes32"
+			},
+			{
+				"name": "_totalsupply",
+				"type": "uint256"
+			},
+			{
+				"name": "_Lbuyprice",
+				"type": "uint256"
+			},
+			{
+				"name": "_Hsellbuyprice",
+				"type": "uint256"
+			},
+			{
+				"name": "_NCTUtoken",
+				"type": "uint256"
+			}
+		],
+		"name": "ownerregister",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "index",
+				"type": "bytes32"
+			}
+		],
+		"name": "sortbuy",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "index",
+				"type": "bytes32"
+			}
+		],
+		"name": "sortsell",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_buy",
+				"type": "string"
+			},
+			{
+				"name": "_sell",
+				"type": "string"
+			},
+			{
+				"name": "index",
+				"type": "bytes32"
+			},
+			{
+				"name": "dealamount",
+				"type": "uint256"
+			},
+			{
+				"name": "dealprice",
+				"type": "uint256"
+			}
+		],
+		"name": "transfer",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"name": "_account",
+				"type": "string"
+			},
+			{
+				"name": "_password",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "x",
+				"type": "bytes32"
+			}
+		],
+		"name": "bytes32ToString",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "account",
+				"type": "string"
+			}
+		],
+		"name": "checkOwner",
+		"outputs": [
+			{
+				"name": "fine",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getBuyCount",
+		"outputs": [
+			{
+				"name": "buyCount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_account",
+				"type": "string"
+			},
+			{
+				"name": "mytokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getMytokenAmount",
+		"outputs": [
+			{
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			},
+			{
+				"name": "MytokenRow",
+				"type": "uint256"
+			}
+		],
+		"name": "getMytokenAtIndex",
+		"outputs": [
+			{
+				"name": "mytokenname",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getMytokenCount",
+		"outputs": [
+			{
+				"name": "mytokenCount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getSellCount",
+		"outputs": [
+			{
+				"name": "sellCount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "row",
+				"type": "uint256"
+			}
+		],
+		"name": "getTokenAtIndex",
+		"outputs": [
+			{
+				"name": "tokenname",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getTokenCount",
+		"outputs": [
+			{
+				"name": "tokenCount",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getTokenHsp",
+		"outputs": [
+			{
+				"name": "Hsellprice",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "tokenKey",
+				"type": "bytes32"
+			}
+		],
+		"name": "getTokenLbp",
+		"outputs": [
+			{
+				"name": "Lbuyprice",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "ownerlist",
+		"outputs": [
+			{
+				"name": "account",
+				"type": "string"
+			},
+			{
+				"name": "password",
+				"type": "string"
+			},
+			{
+				"name": "owneraddress",
+				"type": "address"
+			},
+			{
+				"name": "tokenkey",
+				"type": "bytes32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "account",
+				"type": "string"
+			},
+			{
+				"name": "password",
+				"type": "string"
+			}
+		],
+		"name": "ownerlogin",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "ratelist",
+		"outputs": [
+			{
+				"name": "tokenNoAA",
+				"type": "uint256"
+			},
+			{
+				"name": "tokenNoBB",
+				"type": "uint256"
+			},
+			{
+				"name": "Rate",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"name": "TokenStructs",
+		"outputs": [
+			{
+				"name": "totalsupply",
+				"type": "uint256"
+			},
+			{
+				"name": "issue_time",
+				"type": "uint256"
+			},
+			{
+				"name": "Lbuyprice",
+				"type": "uint256"
+			},
+			{
+				"name": "Hsellprice",
+				"type": "uint256"
+			},
+			{
+				"name": "tokenaddress",
+				"type": "address"
+			},
+			{
+				"name": "NCTUtoken",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+	var address = "0xa127578ef1be91d9a9a8871fea892b3a9ee701c5";
+
+    function LoginBt() {
+		var market = web3.eth.contract(ABI).at(address);
+		
+		var useraccount = document.getElementById('useraccount').value; //Read user's account
+		var userpassword = document.getElementById('userpassword').value;//Read user's password
+		var userExist = market.checkOwner.call(useraccount);	
+		if(userExist==true){	
+		    if(market.ownerlogin.call(useraccount, userpassword)==false){
+			    alert("密碼錯誤，請再輸入一次。");
+			}
+			
+			//Store variable into local storage
+			else{
+				localStorage.setItem('username', useraccount);
+				localStorage.setItem('userpassword', userpassword);
+			    location.href = "/";//Login successfully
+			}
+		}
+		else if(userExist==false){
+			alert("帳號不存在，請再輸入一次。");					
+		}
+    }
+</script>
+</html>
