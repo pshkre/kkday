@@ -19,5 +19,11 @@ from django.views.generic import TemplateView
 urlpatterns = [
     #url(r'^admin/', include(admin.site.urls)),
     url(r'^$', TemplateView.as_view(template_name="index.html")),
+	url(r'^index', TemplateView.as_view(template_name="index.html")),
+	url(r'^register', TemplateView.as_view(template_name="register.html")),
+	url(r'^login', TemplateView.as_view(template_name="login.html")),
+	url(r'^buy', TemplateView.as_view(template_name="buy.html")),
+	url(r'^sell', TemplateView.as_view(template_name="sell.html")),
+	url(r'^launch', TemplateView.as_view(template_name="launch.html")),
     url(r'^login/', include('login.urls')),
 ]
